@@ -6,7 +6,6 @@
 package craps;
 
 import java.util.ArrayList;
-import java.util.Scanner;
 import javax.swing.JOptionPane;
 
 // Main application game loop
@@ -73,8 +72,8 @@ class Game {
                 + "\n\nHow much do you want to bet?", "Enter a bet", JOptionPane.QUESTION_MESSAGE);
         try {
             bet = Integer.parseInt(betString);  //convert string to an integer
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(null, "you suck try again");
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(null, e.getMessage());
             placeBet();
         }
 
@@ -91,9 +90,9 @@ class Game {
         this.dice.add(die);
         this.minRoll = dice.size();
         this.maxRoll = 0;
-        for (int i = 0; i < dice.size(); i++) {
-            this.maxRoll += dice.get(i).numSides;
-        }
+        dice.stream().forEach((dice1) -> {
+            this.maxRoll += dice1.numSides;
+        });
         valueMetrics = new int[(this.maxRoll - this.minRoll) + 1];
     }
 
@@ -147,21 +146,21 @@ class Game {
         if ((option == 1) || (option == 2)) {  //for NO and CANCEL options
             isOver = true;
             StringBuilder stats = new StringBuilder();
-            stats.append("You WON " + calculateWins + " time(s) \n\nYou LOST " + losses + " time(s)");
-            stats.append("\n\nYour total pot is $ " + pot + "\n\nStatistics Single Dice:\n");
+            stats.append("You WON ").append(calculateWins).append(" time(s) \n\nYou LOST ").append(losses).append(" time(s)");
+            stats.append("\n\nYour total pot is $ ").append(pot).append("\n\nStatistics Single Dice:\n");
 
             // First append all the individual dice and their individual stats, listing Die#, Sides, and counts for each.
             for (int i = 0; i < dice.size(); i++) {
-                stats.append("Die #" + (i + 1) + "\n");
+                stats.append("Die #").append(i + 1).append("\n");
                 for (int x = 0; x < dice.get(i).sidesRolled.length; x++) {
-                    stats.append("S:" + (x + 1) + "-R" + dice.get(i).sidesRolled[x] + "\n");
+                    stats.append("S:").append(x + 1).append("-R").append(dice.get(i).sidesRolled[x]).append("\n");
                 }
                 stats.append("\n");
             }
 
             // Then look at each value in the value metrics and list the number of times a value was hit.
             for (int i = 0; i < valueMetrics.length; i++) {
-                stats.append("V:" + (minRoll + i) + "-T:" + valueMetrics[i] + "\n");
+                stats.append("V:").append(minRoll + i).append("-T:").append(valueMetrics[i]).append("\n");
             }
 
             JOptionPane.showMessageDialog(null, stats.toString());
@@ -170,9 +169,9 @@ class Game {
 
     // Call the roll method of each die in the dice collection.
     public void rollDice() {
-        for (int i = 0; i < dice.size(); i++) {
-            dice.get(i).roll();
-        }
+        dice.stream().forEach((dice1) -> {
+            dice1.roll();
+        });
     }
 
     // Gets a string with all rolled values
@@ -190,9 +189,7 @@ class Game {
     // Gets a grand total of each of the die in the dice collection.
     public int getTotal() {
         int total = 0;
-        for (int i = 0; i < dice.size(); i++) {
-            total += dice.get(i).value;
-        }
+        total = dice.stream().map((dice1) -> dice1.value).reduce(total, Integer::sum);
         return total;
     }
 
